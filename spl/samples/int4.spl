@@ -1,0 +1,64 @@
+alias argumentfd S0;
+alias argumentword S1;
+alias physicalSP S2;
+physicalSP = ([PTBR + 2 * (SP/512)] * 512) + (SP % 512);
+alias pid S3;
+alias swoft S4;
+alias seek S5;
+alias fatindex S6;
+alias basicblock S7;
+alias datablock S8;
+alias temp S10;
+pid = [PTBR - 1024] / 4;
+argumentfd = [physicalSP - 4];
+argumentword = [physicalSP -3];
+if([(1536 + (pid * 32) + 15 + (2 * argumentfd ))] == -1 || argumentfd < 0 || argumentfd > 7)then
+	[physicalSP - 2] = -1;
+	ireturn;
+else
+	swoft = [(1536 + (pid * 32) + 15 + (2 * argumentfd ))];
+//	print "swoft";
+//	print swoft;
+	seek = [(1536 + (pid * 32) + 16 + (2 * argumentfd ))];
+	fatindex = [1344 + 2 * swoft];
+	basicblock = [2560 + (8 * fatindex) + 2];
+	load(1,basicblock);
+	datablock = seek/512 ;
+//	print datablock;
+//	breakpoint;
+	datablock = [512 + datablock];
+//	print datablock;
+	if(datablock == -1)then
+		alias count S9;
+		count = 20;
+		while([3072 + count] == 1 && count < 448)do
+			count = count + 1;
+		endwhile;
+		if(count >= 448)then
+			[physicalSP - 2] = -1;
+			ireturn;
+		else
+			[3072 + count] = 1;
+			datablock = count;
+			temp = seek/512;
+			[512 + temp] = count;
+			[2560 + (8 * fatindex) + 1] = [2560 + (8 * fatindex) + 1] + 512 ;
+			store(5,19);
+			store(6,20);
+			store(1,basicblock);
+		endif;
+	endif;
+	breakpoint;
+//	print "the datablock";
+//	print datablock;
+	load(1,datablock);
+	temp = (seek % 512);
+	[512 + temp] = argumentword;
+	store(1,datablock);
+	[(1536 + (pid * 32) + 16 + (2 * argumentfd ))] = seek + 1;
+	[physicalSP - 2] = 0;
+	ireturn;
+	
+	
+			
+endif;

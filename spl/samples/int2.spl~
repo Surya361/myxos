@@ -1,0 +1,105 @@
+alias physicalSP S2;
+alias syscall S3;
+alias diskfree S0;
+alias diskblock S1;
+alias fat S4;
+alias systemwideoft S5;
+systemwideoft = 1344;
+fat = 2560;
+alias indexswoft S8;
+physicalSP = ([PTBR + 2 * (SP/512)] * 512) + (SP % 512);
+syscall = [physicalSP - 1];
+if (syscall == 2) then
+	alias argument S14;
+	argument = [physicalSP - 3];
+	alias index S6;
+	index = 0;
+	breakpoint;
+	while((fat + index) < 3072)do
+	breakpoint;
+		if([fat + index] == argument)then
+			break;
+		endif;
+		index = index + 8;
+	endwhile;
+	if((fat + index) >= 3072)then
+	[physicalSP - 2] = -11;
+	ireturn;
+	endif;
+	index = (index / 8) ;
+	alias count S7;
+	count = 0;
+	while((systemwideoft + count) <  systemwideoft + 128)do
+		if([systemwideoft + count] == index)then
+			break;
+		endif;
+		count = count + 2;
+	endwhile;
+	if((systemwideoft + count ) >= (systemwideoft + 128))then
+		indexswoft = 0;
+		while((systemwideoft + indexswoft) < (systemwideoft + 128))do
+			if([systemwideoft + indexswoft] == -1)then
+				break;
+			endif;
+			indexswoft = indexswoft + 2;
+		endwhile;
+		if((systemwideoft + indexswoft) >= (systemwideoft + 128))then
+			[physicalSP - 2] = -12;
+			ireturn;
+		else
+	//		[systemwideoft + indexswoft] = index;
+	//		[systemwideoft + indexswoft + 1] = 1;
+			indexswoft = indexswoft/2;
+		endif;
+	else
+	//	[systemwideoft + count] = index;
+	//	[systemwideoft + count + 1] = [systemwideoft + count + 1] + 1;
+		indexswoft = count/2 ;
+	endif;
+		alias countt S10;
+		countt = 0;
+		alias pid S15;
+		pid = [PTBR - 1024] / 4;
+		while (countt < 16)do
+			if([pid * 32 + 1536 + 15 + countt] == -1)then
+			break;
+			endif;
+			countt = countt + 2;
+		endwhile;
+		if(countt >= 16)then
+			[physicalSP - 2] = -13;
+			ireturn;
+		endif;
+		[systemwideoft + indexswoft * 2] = index;
+		//print index;
+                [systemwideoft + indexswoft * 2 + 1] = [systemwideoft + indexswoft * 2 + 1] + 1;
+		[pid * 32 + 1536 + 15 + countt] = indexswoft;
+		[pid * 32 + 1536 + 16 + countt] = 0;
+		[physicalSP - 2] = countt/2;
+		//print (systemwideoft + indexswoft * 2);
+		ireturn;
+else
+	alias argument S4;
+	argument = [physicalSP - 3];
+	if(0 > argument || argument > 7)then
+		[physicalSP - 2] = -11;
+		ireturn;
+	else
+		alias pid S15;
+		pid = [PTBR - 1024] / 4;
+		if([pid * 32 + 1536 + 15 + (argument * 2) ] == -1)then
+			[physicalSP - 2] = -12;
+			ireturn;
+		else
+			indexswoft = [pid * 32 + 1536 + 15 + (argument * 2)];
+			[1344 + 2 * indexswoft + 1] = [1344 + 2 * indexswoft + 1]  - 1;
+			if([1344 + 2 * indexswoft + 1] == 0)then
+				[1344 + 2 * indexswoft] = -1;
+			endif;
+			[physicalSP - 2] = 0;
+			ireturn;
+		endif;
+	endif;
+endif; 
+		
+

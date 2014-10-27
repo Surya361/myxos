@@ -1,0 +1,10 @@
+integer main()
+{
+	pid = Fork();
+		if(pid == -2)then
+			Exec("odd.xsm");
+		else
+			Exec("even.xsm");
+		endif;
+	Exit();
+}

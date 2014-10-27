@@ -1,0 +1,126 @@
+alias physicalSP S2;
+alias syscall S3;
+alias diskfree S0;
+alias diskblock S13;
+alias fat S7;
+alias basicblk S8;
+fat = 2560;
+alias swoft S11;
+swoft = 1344;
+physicalSP = ([PTBR + 2 * (SP/512)] * 512) + (SP % 512);
+syscall = [physicalSP - 1];
+if (syscall == 1) then
+	alias argument S4;
+	argument = [physicalSP - 3];
+	diskfree = 6 * 512;
+	diskfree = diskfree + 20;
+	while([diskfree] != 0) do
+		if(diskfree == 6 * 512 + 448) then
+		break;
+		endif;
+		diskfree = diskfree + 1;
+	endwhile;
+	if(diskfree != 6 * 512 + 448) then
+		basicblk = diskfree - (6 * 512);
+		while([fat] != argument && fat < 3071)do
+			fat = fat + 8;
+		endwhile;
+		if(fat >= 3072)then
+			fat = 2560 + 2;
+			while([fat] != -1 && fat < 3071)do
+				fat = fat + 8;
+			endwhile;
+			if(fat > 3072)then
+				[physicalSP - 2] = -1;
+				ireturn;
+			else
+				fat = fat - 2;
+				[fat] = argument;
+				[fat + 2] = basicblk;
+				[diskfree] = 1;
+				load(1,basicblk);
+				alias data S9;
+				data = 512 ;
+				while(data < (512 + 256)) do
+					[data] = -1;
+					data = data + 1;
+				endwhile;
+				store(1,basicblk);
+				store(5,19);
+				store(6,20);
+				[physicalSP - 2] = 0;
+				ireturn;
+			endif;
+		else
+			[physicalSP - 2] = 0;
+			ireturn;
+		endif;	
+	else
+		[physicalSP - 2] = -1;
+		ireturn;
+	endif;
+else
+	alias argument S4;
+	argument = [physicalSP - 3];
+	while([fat] != argument && fat < 3071)do
+		fat = fat + 8;
+	endwhile;
+	if(fat > 3071)then
+		[physicalSP - 2] = -1;
+		ireturn;
+	else
+		alias fatindex S9;
+		fatindex = (fat - 2560)/8;
+		//print fatindex;
+		alias count S12;
+		count = 0;
+		while(count <  128)do
+			if([swoft + count] == fatindex)then
+			break;
+			endif;
+			count = count + 2;
+		endwhile;
+		if(count < 128)then
+			[physicalSP - 2] = -1;
+			ireturn;
+		else
+			basicblk = [fat + 2];
+			load(1,basicblk);
+			count = 0;
+			alias countt S13;
+			countt = 0;
+			breakpoint;
+			while((count < 256) && ([count + 512] != -1))do
+				diskblock = [count + 512];
+				load(1,diskblock);
+				breakpoint;
+				while(countt < 512)do
+					[512 + countt] = "";
+					countt = countt + 1;
+				endwhile;
+				
+				[3072 + diskblock] = 0;
+				countt = 0;
+				store(1,diskblock);
+				load(1,basicblk);
+				count = count + 1;
+			endwhile;
+			count = 0;
+			breakpoint;
+			while(count < 256)do
+				[512 + count] = "";
+				count = count + 1;
+			endwhile;
+//			breakpoint;
+			[3072 + basicblk] = 0;
+			store(1,basicblk);
+			[fat] = -1;
+			[fat + 2] = -1;
+			store(5,19);
+			store(6,20);
+			[physicalSP - 2] = 0;
+			ireturn;
+		endif;
+	endif;
+endif;
+		

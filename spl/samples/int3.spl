@@ -1,0 +1,67 @@
+alias physicalSP S2;
+physicalSP = ([PTBR + 2 * (SP/512)] * 512) + (SP % 512);
+alias pid S3;
+alias swoft S4;
+alias seek S5;
+alias fatindex S6;
+alias basicblock S7;
+alias datablock S8;
+alias temp S10;
+pid = [PTBR - 1024] / 4;
+alias syscall S11;
+alias filesize S12;
+syscall = [physicalSP - 1];
+if(syscall == 6)then
+	alias argumentfd S0;
+	alias argumentns S1;
+	argumentfd = [physicalSP - 4];
+	argumentns = [physicalSP - 3];
+	if([(1536 + (pid * 32) + 15 + (2 * argumentfd ))] == -1 || argumentfd < 0 || argumentfd > 7 )then
+	[physicalSP - 2] = -12;
+	ireturn;
+	else
+		swoft = [(1536 + (pid * 32) + 15 + (2 * argumentfd ))];
+		fatindex = [1344 + 2 * swoft];
+		filesize = [2560 + (8 * fatindex) + 1];
+		//print argumentns;
+		//print filesize;
+		if(argumentns < 0 || argumentns > filesize)then
+			[physicalSP - 2] = -13;
+			ireturn;
+		else
+			 [(1536 + (pid * 32) + 16 + (2 * argumentfd ))] = argumentns ;
+			[physicalSP - 2] = 0;
+			ireturn;
+		endif;
+	endif;
+else
+	alias argumentfd S0;
+	alias argumentwr S1;
+	argumentfd = [physicalSP - 4];
+	if([(1536 + (pid * 32) + 15 + (2 * argumentfd ))] == -1 || argumentfd < 0 || argumentfd > 7 )then
+        	[physicalSP - 2] = -1;
+        	ireturn;
+	else
+		swoft = [(1536 + (pid * 32) + 15 + (2 * argumentfd ))];
+		seek = [(1536 + (pid * 32) + 16 + (2 * argumentfd ))];
+		fatindex = [1344 + 2 * swoft];
+		filesize = [2560 + (8 * fatindex) + 1];
+		basicblock = [2560 + (8 * fatindex) + 2];
+		if(seek == filesize)then
+			[physicalSP - 2] = -1;
+			ireturn;
+		else
+			temp = seek/512;
+			load(1,basicblock);
+			datablock = [512 + temp];
+			load(1,datablock);
+			temp = seek % 512;
+			argumentwr = [512 + temp];
+			[physicalSP -  3] = argumentwr;
+			[(1536 + (pid * 32) + 16 + (2 * argumentfd ))] = seek + 1;
+			[physicalSP - 2] = 0;
+			ireturn;
+		endif;
+	endif;
+endif;
+

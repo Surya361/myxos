@@ -1,0 +1,5 @@
+START
+MOV T0,  "hello world"
+OUT T0
+HALT
+HALT
