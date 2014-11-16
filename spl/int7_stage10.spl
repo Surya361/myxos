@@ -1,3 +1,4 @@
+print("entering int7");
 alias physicalSP S0;
 physicalSP = ([PTBR + 2 * (SP/512)] * 512) + (SP % 512);
 alias syscall S1;
@@ -6,17 +7,21 @@ alias pid  S2;
 alias cpcb S3;
 alias count S4;
 alias indexswoft S5;
+alias temp S13;
 if(syscall == 10)then
+	print "exiting";
 	pid = (PTBR - 1024)/8;
 	//print pid;
 	cpcb = (1536 + (pid * 32));
 	count = 0;
-	cpcb = 1536;
-	while(cpcb < 2559)do
-		if([cpcb + 1] == (pid + 100))then
-		[cpcb + 1] = 0;
+	temp = 1536;
+	while(temp < 2559)do
+		if([temp + 1] == (pid + 100))then
+		[temp + 1] = 1;
 		endif;
+		temp = temp + 32;
 	endwhile;
+//	print "completed while1";
 	while(count < 8)do
 		indexswoft = [cpcb + 15 + (2 * count)];
 		[1344 + 2 * indexswoft + 1] = [1344 + 2 * indexswoft + 1]  - 1;
@@ -27,20 +32,23 @@ if(syscall == 10)then
 		[cpcb + 16 + (count * 2)] = -1;
 		count = count + 1;
 	endwhile;
+//	print "completed while2";
 	[cpcb + 1] = 0;
 	count = 0;
 	while(count < 4)do
 		alias memblock S10;
 		memblock = [PTBR + (2 * count)];
-		if(memblock == -1)then
+		if(memblock >= 448)then
+			[3072 + memblock] = [3072 + memblock] - 1;
 			count = count + 1;
 		else
-			[1280 + memblock] = 0;
+			[1280 + memblock] = [1280 + memblock] - 1;
 			[PTBR + (2 * count)] = -1;
 			[PTBR + (2 * count) + 1] = "00";
 			count = count + 1;
 		endif;
 	endwhile;
+//	print "completed while3";
 	breakpoint;
 	breakpoint;
 	cpcb = 1536;
@@ -50,8 +58,8 @@ if(syscall == 10)then
 		else
 			cpcb = cpcb + 32;
 		endif;
-	//print cpcb;
 	endwhile;
+//	print "completed while4";
 	if(cpcb >= 2559)then
 	halt;
 	else
@@ -72,6 +80,7 @@ if(syscall == 10)then
 		newphysicalSP = ([PTBR + 2 * (SP / 512) ] * 512) + (SP % 512);
 		[newphysicalSP] = [cpcb + 4];
 		[cpcb + 1] = 2;
+		print("exiting int7");
 		ireturn;
 	endif;
 else
@@ -80,6 +89,9 @@ else
 		argument = [physicalSP - 3];
 		alias pid S7;
 		pid = (PTBR - 1024)/8;
+		print "wait in for";
+		print pid;
+		print argument;
 		if(pid == argument)then
 			[physicalSP - 2] = -1;
 			ireturn;
@@ -90,6 +102,7 @@ else
 		endif;
 		[physicalSP - 2] = 0;
 		[1536 + (pid * 32) + 1] = 100+argument;
+		breakpoint;
 		inline "JMP 4608";
 	endif;
 		
@@ -103,6 +116,7 @@ endif;
                 	if([cpcb + 1] == (pid + 100))then
                 	[cpcb + 1] = 1;
                 	endif;
+			cpcb = cpcb + 32;
         	endwhile;
 		[physicalSP - 2] = 0;
 		ireturn;

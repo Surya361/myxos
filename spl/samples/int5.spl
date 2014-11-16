@@ -3,6 +3,7 @@ alias syscall S1;
 alias ipcb S2;
 physicalSP = ([PTBR + 2 * (SP/512)] * 512) + (SP % 512);
 syscall = [physicalSP - 1];
+print("in fork");
 if(syscall == 8)then
 	ipcb = 0;
 	while(ipcb < 32)do //checking for free blocks in PCB
@@ -10,6 +11,7 @@ if(syscall == 8)then
 			break;
 		endif;
 		ipcb = ipcb + 1;
+		print("here");
 	endwhile;
 	if(ipcb == 32)then //if not found return -1 and exit
 		[physicalSP - 2] = -1;
@@ -17,8 +19,8 @@ if(syscall == 8)then
 	else
 		[1536 + (ipcb * 32)] = ipcb;
 	endif;
-//	print "a top ipcb";
-//	print ipcb;
+	print "a top ipcb";
+	print ipcb;
 	alias validpagescount S3;
 	validpagescount = 0;
 	while(validpagescount <= 4)do //checking for the number of valid pages

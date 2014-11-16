@@ -1,0 +1,104 @@
+decl
+	integer a[100],bubblesort(),len1;
+enddecl
+integer bubblesort()
+{
+	integer i,j,k;
+	i=0;
+	while (i< len1-1)do
+		j=0;
+		while j<len1-1 do
+			if a[j]>a[j+1] then
+				k=a[j];
+				a[j]=a[j+1];
+				a[j+1]=k;
+			endif;
+			j=j+1;
+		endwhile;
+		i=i+1;
+	endwhile;	
+	return 0;
+}
+
+integer main()
+{
+	integer fd1,fd2,fd3,p,i,m,cid,temp,temp1;
+	i=0;
+	temp = Create("num1.dat");
+        temp = Open("num1.dat");
+        temp1 = Write(temp,"5");
+        temp1 = Write(temp,"3");
+        temp1 = Write(temp,"4");
+        temp1 = Write(temp,"1");
+        temp1 = Write(temp,"-1");
+        temp1 = Close(temp);
+        temp = Create("num2.dat");
+        temp = Open("num2.dat");
+        temp1 = Write(temp,"8");
+        temp1 = Write(temp,"6");
+        temp1 = Write(temp,"7");
+        temp1 = Write(temp,"-1");
+        temp1 = Close(temp);
+	cid=Fork();
+	if(cid == -2) then
+		fd1 = Open("num1.dat");
+		while(p != -1) do
+			m=Read(fd1,p);
+			a[i] = p;
+			print(a[i]);
+			i=i+1;
+		endwhile;
+		len1=i-1;
+		p=Close(fd1);
+		i=bubblesort();
+		fd1 = Open("num1.dat");
+		i=0;
+		while(a[i] != -1) do
+			p = a[i];
+			print(p);
+			p = Write(fd1,p);
+			i=i+1;
+		endwhile;
+		p = Close(fd1);
+		p = Signal();
+		print(p);
+		breakpoint;
+		
+	else
+		
+		p = Wait(cid);
+		print("very");
+		breakpoint;
+		cid = Fork();
+		breakpoint;
+		print("good");
+		print(cid);
+		if(cid == -2) then
+			i=0;
+			fd2 = Open("num2.dat");
+			while(p != -1) do
+				m=Read(fd2,p);
+				a[i] = p;
+				print(p);
+				i=i+1;
+			endwhile;
+			len1=i-1;
+			p=Close(fd2);
+			i=bubblesort();
+			fd2 = Open("num2.dat");
+			i=0;
+			while(a[i] != -1) do
+				p = a[i];
+				p = Write(fd2,p);
+				print(p);
+				i=i+1;
+			endwhile;
+			p = Close(fd2);
+			p = Signal();
+		else
+			p=Wait(cid);
+			p=Exec("merge.xsm");
+		endif;
+	endif;
+	return(0);
+}
