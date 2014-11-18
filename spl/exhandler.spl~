@@ -45,9 +45,6 @@ else
 			temp = 1024;
 			while(victim == -1)do
 				tempee = 1;
-				if(temp >= 1280)then
-				temp = 1024;
-				endif;
 				while(tempee < 6)do
 					if([temp + tempee] == "11")then
 						[temp + tempee] = "01";
@@ -56,12 +53,9 @@ else
 							tem = 448;
 							while([3072 + tem] < 511)do
 								if([3072 + tem] == 0)then
-									print("entered core if with");
-									print(temp);
-									print(tempee);
 									victim = [temp + tempee - 1];
 									store(victim,tem);
-//									[MEM_LIST + victim] = 0;
+									[MEM_LIST + victim] = 0;
 									[3072 + tem] = 1;
 									[temp + tempee - 1] = tem;
 									[temp + tempee] = "00";
@@ -73,7 +67,11 @@ else
 					endif;
 					tempee = tempee + 2;
 				endwhile;
+				if(temp > 1280)then
+				temp = 1024;
+				else
 				temp = temp + 8;
+				endif;
 			endwhile;
 			print victim;
 			breakpoint;

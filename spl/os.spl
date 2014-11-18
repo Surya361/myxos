@@ -68,4 +68,9 @@ while(counter < 2559)do
 	[counter + 1] = 0;
 	counter = counter + 32;
 endwhile;
+counter = (3072 + 448);
+while(counter < 3584)do
+	[counter] = 0;
+	counter = counter + 1;
+endwhile;
 ireturn;

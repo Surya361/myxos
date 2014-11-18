@@ -1,4 +1,4 @@
-//breakpoint;
+breakpoint;
 alias currentPID S0;
 currentPID = (PTBR - 1024) / 8;
 alias currentPCB S1;
@@ -24,7 +24,7 @@ physicalSP = ([PTBR + 2 * (SP / 512) ] * 512) + (SP % 512);
 [currentPCB + 12 ] = R5;
 [currentPCB + 13 ] = R6;
 [currentPCB + 14 ] = R7;
-//breakpoint;
+breakpoint;
 alias temp S3;
 alias newPCB S4;
 newPCB = currentPCB;
@@ -40,7 +40,7 @@ while( temp != currentPCB) do
 		temp = temp + 32;
 	endif;
 endwhile;
-//breakpoint;
+breakpoint;
 BP = [newPCB + 2];
 SP = [newPCB + 3];
 R0 = [newPCB + 7];

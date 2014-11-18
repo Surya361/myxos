@@ -2,7 +2,6 @@ print("entering int5");
 alias physicalSP S0;
 alias syscall S1;
 alias ipcb S2;
-breakpoint;
 physicalSP = ([PTBR + 2 * (SP/512)] * 512) + (SP % 512);
 syscall = [physicalSP - 1];
 if(syscall == 8)then
@@ -19,7 +18,6 @@ if(syscall == 8)then
 	else
 		[1536 + (ipcb * 32)] = ipcb;
 	endif;
-breakpoint;
 //	print "a top ipcb";
 //	print ipcb;
 //	alias validpagescount S3;
@@ -42,7 +40,6 @@ breakpoint;
 		endif;
 		temp = temp + 1;
 	endwhile;
-breakpoint;
 	if(temp >= 64)then
 		[physicalSP - 2] = -1;
 		ireturn;
@@ -158,6 +155,4 @@ breakpoint;
 	//breakpoint;
 	print("exiting int5");
 	ireturn;
-breakpoint;
 endif;
-

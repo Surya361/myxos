@@ -12,7 +12,7 @@ alias temp2 S7;
 alias count S8;
 alias memblock S10;
 alias datablock S11;
-//breakpoint;
+breakpoint;
 if(syscall == 9)then
 	fat = 2560;
 	while(fat < 3071)do
@@ -39,7 +39,7 @@ if(syscall == 9)then
 		endwhile;
 		ncodeblocks = temp;
 		temp = 0;
-//breakpoint;
+breakpoint;
 		while(temp < 6)do
 			if([PTBR + temp + 1] == "10" || [PTBR + temp + 1] == "00")then
 				temp2 = [PTBR + temp];
@@ -147,7 +147,7 @@ if(syscall == 9)then
 		temp = [PTBR + (2 * 3)];
 		[512 * temp] = 0;
 		print("exiting int6");
-		//breakpoint;
+		breakpoint;
 		ireturn;		
 	endif;
 else
