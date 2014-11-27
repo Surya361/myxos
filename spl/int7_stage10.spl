@@ -9,7 +9,7 @@ alias count S4;
 alias indexswoft S5;
 alias temp S13;
 if(syscall == 10)then
-	print "exiting";
+//	print "exiting";
 	pid = (PTBR - 1024)/8;
 	//print pid;
 	cpcb = (1536 + (pid * 32));
@@ -40,15 +40,22 @@ if(syscall == 10)then
 	while(count < 4)do
 		alias memblock S10;
 		memblock = [PTBR + (2 * count)];
-		if(memblock >= 448)then
-			[3072 + memblock] = [3072 + memblock] - 1;
-			count = count + 1;
-		else
-			[1280 + memblock] = [1280 + memblock] - 1;
-			[PTBR + (2 * count)] = -1;
-			[PTBR + (2 * count) + 1] = "00";
-			count = count + 1;
+		if([PTBR + (2 * count) + 1] == "01" || [PTBR + (2 * count) + 1] == "11" )then
+			if(memblock >= 448)then
+				[3072 + memblock] = [3072 + memblock] - 1;
+				count = count + 1;
+			else
+				[1280 + memblock] = [1280 + memblock] - 1;
+				[PTBR + (2 * count)] = -1;
+				[PTBR + (2 * count) + 1] = "00";
+				count = count + 1;
+			endif;
 		endif;
+		if(memblock >= 448)then
+			[3072 + memblock] = [3072 + memblock] -1;
+		endif;
+		count = count + 1;
+		
 	endwhile;
 //	print "completed while3";
 	//breakpoint;
@@ -83,6 +90,7 @@ if(syscall == 10)then
 		[newphysicalSP] = [cpcb + 4];
 		[cpcb + 1] = 2;
 		print("exiting int7");
+		breakpoint;
 		ireturn;
 	endif;
 else

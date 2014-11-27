@@ -60,5 +60,5 @@ alias newphysicalSP S2;
 newphysicalSP = ([PTBR + 2 * (SP / 512) ] * 512) + (SP % 512);
 [newphysicalSP] = [newPCB + 4];
 [newPCB + 1] = 2;
-
+breakpoint;
 ireturn;

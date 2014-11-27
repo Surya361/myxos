@@ -33,7 +33,7 @@ breakpoint;
 //	endwhile;
 //	print validpagescount;
 	alias temp S4;
-	temp = 0;
+	temp = 25;
 	alias count S5;
 	count = 0;
 	while(temp < 64)do
